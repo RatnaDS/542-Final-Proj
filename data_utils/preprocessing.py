@@ -39,12 +39,12 @@ class Preprocessor:
 
     def load_image_volume(self, case_path):
         volume_path = os.path.join(case_path, IMAGE_FILE)
-        vol = nib.load(volume_path)
+        vol = nib.load(volume_path).get_data()
         return vol
 
     def load_segmentation_volume(self, case_path):
         segmentation_path = os.path.join(case_path, SEGMENTATION_FILE)
-        seg = nib.load(segmentation_path)
+        seg = nib.load(segmentation_path).get_data()
         return seg
     
     def load_case(self, case_id):
