@@ -2,6 +2,8 @@ from pathlib import Path
 import numpy as np
 from imageio import imwrite
 
+from .visualization import colorize_mask
+
 # Constants
 DEFAULT_KIDNEY_COLOR = [255, 0, 0]
 DEFAULT_TUMOR_COLOR = [0, 0, 255]
@@ -60,9 +62,11 @@ def extract_and_save_slices(cid, vol, seg, destination,
 
             list_seg.append(i)
 
+            vis_seg_slice = colorize_mask(seg_slice)
+
             #saving of images
             imwrite(str(sliced_vol_path / ("{}_{:05d}.png".format(cid, i))),vol_slice)#.astype('uint8'))
-            imwrite(str(sliced_seg_path / ("{}_{:05d}.png".format(cid, i))),seg_slice)#.astype('uint8'))
+            imwrite(str(sliced_seg_path / ("{}_{:05d}.png".format(cid, i))),vis_seg_slice)#.astype('uint8'))
 
             #maintaining the path lists in a list 
             list_vol.append(sliced_vol_path / ("{}_{:05d}.png".format(cid, i)))
