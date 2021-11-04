@@ -1,5 +1,4 @@
 import os
-from re import L
 import nibabel as nib
 import numpy as np
 import cv2
