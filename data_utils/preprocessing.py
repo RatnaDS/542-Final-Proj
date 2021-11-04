@@ -1,4 +1,5 @@
 import os
+from re import L
 import nibabel as nib
 import numpy as np
 import cv2
@@ -19,14 +20,20 @@ class Preprocessor:
         filenames, indices = extract_and_save_slices(cid, vol, seg, destination)
         return filenames, indices
 
-    def generate_bounding_boxes(self, segmentations):
+    def generate_bounding_boxes(self, segmentations, seg_values=[1, 2]):
         
         labels = []
 
         # Find bounding box
         for segmentation_mask in segmentations:
             # Threshold
-            _segmentation_mask = ((segmentation_mask > 0)*1).astype(np.uint8)
+            if isinstance(seg_values, list):
+                _segmentation_mask = (
+                    1*np.logical_or(
+                        segmentation_mask == seg_values[0], 
+                        segmentation_mask == seg_values[1])).astype(np.uint8)
+            else:
+                _segmentation_mask = ((segmentation_mask == seg_values)*1).astype(np.uint8)
             contours, hierarchy = cv2.findContours(_segmentation_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
             _label_str = []
             for cnt in contours:
@@ -37,9 +44,9 @@ class Preprocessor:
 
         return labels
 
-    def save_bounding_boxes(self, base_save_dir, case_id, bounding_boxes):
+    def save_bounding_boxes(self, base_save_dir, filename, bounding_boxes):
         for i, bounding_box in enumerate(bounding_boxes):
-            filename = os.path.join(base_save_dir, "bounding_boxes", f"{case_id}_{i}.txt")
+            filename = os.path.join(base_save_dir, "labels", "{}.txt".format(filename))
             with open(filename, "w") as f:
                 f.write(bounding_box)
 
@@ -64,11 +71,15 @@ class Preprocessor:
         for case_id in self.case_ids:
             vol, seg = self.load_case(case_id)
             filenames, indices = self.extract_and_save_slices(case_id, vol, seg, base_save_dir)
-            segmentations = [seg[i] for i in indices]
-            bounding_boxes = self.generate_bounding_boxes(segmentations)
-            self.save_bounding_boxes(base_save_dir, case_id, bounding_boxes)
-            files += filenames
 
-        file_list = "\n".join(files)
-        with open(os.path.join(base_save_dir, "filenames.txt"), "w") as f:
-            f.write(file_list)
+    def generate_bb(self, segmentation_image_path, base_save_dir, seg_values=[1, 2]):
+        images = os.listdir(segmentation_image_path)
+        for image in images:
+            seg_img = cv2.imread(os.path.join(segmentation_image_path, image))[:, :, ::-1]
+            # Convert to original
+            seg = np.zeros(seg_img.shape[:2])
+            seg[seg_img[:, : 0] == 255] = 1 # R
+            seg[seg_img[:, : 2] == 255] = 2 # B
+            bounding_boxes = self.generate_bounding_boxes(seg, seg_values=seg_values)
+            filename = image.split(".")[0]
+            self.save_bounding_boxes(base_save_dir, filename, bounding_boxes)
