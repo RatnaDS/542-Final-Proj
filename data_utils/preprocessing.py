@@ -3,7 +3,7 @@ import nibabel as nib
 import numpy as np
 import cv2
 
-from extraction import extract_and_save_slices
+from .extraction import extract_and_save_slices
 
 
 SEGMENTATION_FILE = "segmentation.nii.gz"
@@ -25,7 +25,9 @@ class Preprocessor:
 
         # Find bounding box
         for segmentation_mask in segmentations:
-            contours, hierarchy = cv2.findContours(segmentation_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[-2:]
+            # Threshold
+            _segmentation_mask = ((segmentation_mask > 0)*1).astype(np.uint8)
+            contours, hierarchy = cv2.findContours(_segmentation_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2:]
             _label_str = []
             for cnt in contours:
                 x, y, w, h = cv2.boundingRect(cnt)
@@ -37,7 +39,7 @@ class Preprocessor:
 
     def save_bounding_boxes(self, base_save_dir, case_id, bounding_boxes):
         for i, bounding_box in enumerate(bounding_boxes):
-            filename = os.path.join(base_save_dir, f"{case_id}_{i}.txt")
+            filename = os.path.join(base_save_dir, "bounding_boxes", f"{case_id}_{i}.txt")
             with open(filename, "w") as f:
                 f.write(bounding_box)
 
