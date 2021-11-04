@@ -19,12 +19,15 @@ class Preprocessor:
         filenames, indices = extract_and_save_slices(cid, vol, seg, destination)
         return filenames, indices
 
-    def generate_bounding_boxes(self, segmentations, seg_values=[1, 2]):
+    def generate_bounding_boxes(self, segmentations, seg_values=[1, 2], center_and_scale=False):
         
         labels = []
 
         # Find bounding box
         for segmentation_mask in segmentations:
+
+            H, W = segmentation_mask.shape
+
             # Threshold
             if isinstance(seg_values, list):
                 _segmentation_mask = (
@@ -37,7 +40,19 @@ class Preprocessor:
             _label_str = []
             for cnt in contours:
                 x, y, w, h = cv2.boundingRect(cnt)
-                _label_str.append(f"0 {x} {y} {w} {h}")
+                if center_and_scale:
+                    x_center = float(x) + float(w) / 2.
+                    y_center = float(y) + float(h) / 2.
+
+                    # Scale
+                    x_center = x_center / float(W)
+                    w = w / float(W)
+                    y_center = y_center / float(H)
+                    h = h / float(H)
+                    _label_str.append(f"0 {x_center} {y_center} {w} {h}")
+                else:
+                    _label_str.append(f"0 {x} {y} {w} {h}")
+
             label_str = "\n".join(_label_str)
             labels.append(label_str)
 
