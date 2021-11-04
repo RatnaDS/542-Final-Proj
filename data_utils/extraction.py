@@ -2,6 +2,8 @@ from pathlib import Path
 import numpy as np
 from imageio import imwrite
 
+from .visualization import colorize_mask
+
 # Constants
 DEFAULT_KIDNEY_COLOR = [255, 0, 0]
 DEFAULT_TUMOR_COLOR = [0, 0, 255]
@@ -24,14 +26,6 @@ def hu_to_grayscale(volume, hu_min, hu_max):
     # Repeat three times to make compatible with color overlay
     im_volume = 255*im_volume
     return np.stack((im_volume, im_volume, im_volume), axis=-1)
-
-
-def visualize_mask(seg):
-    H, W = seg.shape
-    vis_mask = np.zeros((H, W, 3), dtype=np.uint8)
-    vis_mask[seg == 1] = np.array([255, 0, 0], dtype=np.uint8) # R for kidney
-    vis_mask[seg == 2] = np.array([0, 0, 255], dtype=np.uint8) # B for tumor
-    return vis_mask
 
 
 def extract_and_save_slices(cid, vol, seg, destination, 
@@ -68,7 +62,7 @@ def extract_and_save_slices(cid, vol, seg, destination,
 
             list_seg.append(i)
 
-            vis_seg_slice = visualize_mask(seg_slice)
+            vis_seg_slice = colorize_mask(seg_slice)
 
             #saving of images
             imwrite(str(sliced_vol_path / ("{}_{:05d}.png".format(cid, i))),vol_slice)#.astype('uint8'))
