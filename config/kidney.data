@@ -1,4 +1,0 @@
-classes=1
-train=E:\Masters\Classes\ECE542\final-project\ECE542-Final-Project\data\train.txt
-valid=E:\Masters\Classes\ECE542\final-project\ECE542-Final-Project\data\val.txt
-names=E:\Masters\Classes\ECE542\final-project\ECE542-Final-Project\data\class.names
