@@ -92,8 +92,8 @@ class Preprocessor:
             seg_img = cv2.imread(os.path.join(segmentation_image_path, image))[:, :, ::-1]
             # Convert to original
             seg = np.zeros(seg_img.shape[:2])
-            seg[seg_img[:, : 0] == 255] = 1 # R
-            seg[seg_img[:, : 2] == 255] = 2 # B
-            bounding_boxes = self.generate_bounding_boxes([seg], seg_values=seg_values)
+            seg[seg_img[:, :, 0] == 255] = 1 # R
+            seg[seg_img[:, :, 2] == 255] = 2 # B
+            bounding_boxes = self.generate_bounding_boxes([seg], seg_values=seg_values, center_and_scale=True)
             filename = image.split(".")[0]
             self.save_bounding_boxes(base_save_dir, filename, bounding_boxes)
