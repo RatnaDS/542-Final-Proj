@@ -4,17 +4,6 @@ import random
 from math import floor
 import os
 
-# data = []
-# for i in range(300):
-
-#     data.append(i)
-
-# print(len(data))
-
-# dir = "D:\\Desktop\\ECE_542\\ECE_542_Course_Project\\kits19\\data"
-
-# case_ids = os.listdir(dir)
-
 def split(case_ids):
     
     random.seed(42)
@@ -31,15 +20,33 @@ def split(case_ids):
     train_val_cases = deepcopy(case_ids_copy[:num_train_val_cases])
     test_cases = deepcopy(case_ids_copy[num_train_val_cases:])
 
-    # random.shuffle(train_val_cases)
-
     train_cases = train_val_cases[:num_train]
     val_cases = train_val_cases[num_train:]
-
-    # print("test", test)
-    # print("train", train)
-    # print("val", val)
 
     return {'train':train_cases, 'val':val_cases, 'test':test_cases}
 
     
+def retrieve_split_files(splits, data_dir, base_dir):
+    
+    files = sorted(os.listdir(data_dir))
+
+    filestore = {
+        "train": [],
+        "val": [],
+        "test": []
+    }
+
+    for split, case_ids in splits.items():
+        for case_id in sorted(case_ids):
+            print(case_id)
+            files_to_take = [os.path.join(base_dir, file) for file in files if case_id in file]
+            filestore[split] += files_to_take
+    return filestore
+
+
+def make_files(save_dir, filename, files):
+
+    writestring = "\n".join(files)
+
+    with open(os.path.join(save_dir, filename), "w") as f:
+        f.write(writestring)
