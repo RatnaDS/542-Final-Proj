@@ -152,11 +152,12 @@ class C3(nn.Module):
         # self.m = nn.Sequential(*[CrossConv(c_, c_, 3, 1, g, 1.0, shortcut) for _ in range(n)])
 
     def forward(self, x):
+        
+        _x = self.cv3(torch.cat((self.m(self.cv1(x)), self.cv2(x)), dim=1))
         if self.dropout is not None:
-            _x = self.dropout(x)
+            _x = self.dropout(_x)
         else:
             _x = x
-        _x = self.cv3(torch.cat((self.m(self.cv1(_x)), self.cv2(_x)), dim=1))
         
         return _x
 
