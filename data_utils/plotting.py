@@ -22,7 +22,7 @@ def plot_curves(values: List[np.ndarray], titles: List[str], plot_title: str,
     plt.title(plot_title)
 
     if save:
-        plt.savefig(os.path.join(save_path, "loss.png"), bbox_inches="tight", pad_inches=0.1)
+        plt.savefig(save_path, bbox_inches="tight", pad_inches=0.1)
 
     if show:
         plt.show()
